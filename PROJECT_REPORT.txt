@@ -1,0 +1,183 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                         A T M O S C H A I N
+      INTELLIGENT WASTE MANAGEMENT, PLASMA SIMULATION & CCTS ECOSYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERSION: 1.0.0
+AUTHOR: ATMOSCHAIN Core Dev Team
+STATUS: PROTOTYPE / HACKATHON BUILD
+
+==============================================================================
+1. PROJECT OVERVIEW & ARCHITECTURE
+==============================================================================
+ATMOSCHAIN is a tripartite system architecture consisting of a Computer Vision 
+pipeline, a thermodynamic simulation engine, and an automated ERC-20 token 
+generation system. It aims to solve the problem of open-air landfill emissions 
+(specifically methane) by theoretically redirecting Municipal Solid Waste (MSW) 
+to high-temperature Plasma Gasification plants and rewarding participants via 
+tokenized carbon credits.
+
+The system is composed of three tightly coupled modules:
+  MODULE 1: WasteVision AI (Machine Learning & Computer Vision)
+  MODULE 2: PlasmaSim Optimizer (Thermodynamic & Physics Simulation)
+  MODULE 3: CCTS SmartMarket (Blockchain Tokenization & Ledger)
+
+The user flow is sequential: 
+  A user scans waste -> Gets AI Analysis -> Simulates its destruction -> Mints Carbon Credits.
+
+==============================================================================
+2. MACHINE LEARNING: WASTEVISION AI & METHANE ENGINE
+==============================================================================
+The primary purpose of the Machine Learning integration is to identify waste at 
+the source and calculate its real-world climate hazard (Methane Potential).
+
+A. Image Classification (Computer Vision)
+- Tool used: Google Gemini 2.0 Flash Vision API.
+- Why: Real-time, highly accurate edge-case detection. It analyzes a base64 
+  webcam feed and returns structured JSON describing the waste (plastic, 
+  organic, metal, etc.).
+- Location: `ml_models/wastevision/waste_detector.py`
+
+B. The Methane Prediction Engine (The core Mathematical ML Model)
+- Tool used: IPCC (Intergovernmental Panel on Climate Change) First-Order Decay (FOD) Model.
+- How it works:
+  1. Once the waste is classified (e.g., "Organic Apple Core"), the model maps 
+     this to a specific Degradable Organic Carbon (DOC) fraction. 
+     (e.g., Food Waste DOC = 0.15).
+  2. It applies a Methane Generation Rate Constant (k) and the Fraction of 
+     Degradable Organic Carbon that decomposes (DOC_f).
+  3. It calculates exactly how many kilograms of CH4 (Methane) this item 
+     would produce over its lifetime in an anaerobic landfill like Ghazipur.
+  4. It converts CH4 to CO2-equivalent (CO2e) using the Global Warming Potential 
+     (GWP) multiplier of 28.
+- Location: `ml_models/methane_model/methane_prediction.py`
+- Defense: This is not just an API wrapper; it is an intelligent mathematical 
+  pipeline applying international baseline climate science to real-time imagery.
+
+==============================================================================
+3. SIMULATION MODELING: PLASMASIM OPTIMIZER
+==============================================================================
+Plasma Gasification is the process of using 5000°C plasma arcs to break down 
+waste at the molecular level, creating clean Syngas instead of toxic ash/smoke.
+
+A. The Thermodynamic Pipeline
+- Rather than just producing random numbers, this module simulates the four stages 
+  of a real industrial gasification plant:
+  1. Plasma Reactor (Thermal Cracking at 5500°C)
+  2. Cyclone Separator (Removing >99% of >10-micron particles/slag)
+  3. Gas Scrubber (Neutralizing acidic gases like HCl or H2S)
+  4. Fractionation Tower (Cryogenically separating H2, CO, CO2, and CH4)
+- Location: `simulation/` directory.
+
+B. Gas Yield & Energy Prediction Modeling
+- Based on the input waste type (from WasteVision), it uses an empirical database 
+  (`ml_models/plasmasim_models/gas_yield_predictor.py`) to determine the exact 
+  volumetric yield of Syngas (Hydrogen vs. Carbon Monoxide).
+- It calculates the theoretical thermal and electrical energy output (kWh) 
+  accounting for realistic turbine efficiencies (35%).
+- Defense: The simulation is rooted in actual thermodynamic yield coefficients, 
+  allowing the UI to visually and mathematically represent the destruction of waste.
+
+==============================================================================
+4. BLOCKCHAIN INTEGRATION: CCTS SMARTMARKET
+==============================================================================
+CCTS (Carbon Credit Trading System) decentralizes the issuance and tracking of 
+carbon offsets, preventing double-counting and central authority manipulation.
+
+A. The Smart Contract
+- Standard: ERC-20 Token (Fungible Token).
+- Name/Symbol: CarbonCreditToken (CCT).
+- Location: `blockchain/smart_contracts/carbon_credit_token.sol`.
+- Functionality: 
+  - `mint()`: Allows the protocol (onlyOwner) to generate entirely new tokens 
+    based off verified metric tonnes of CO2e avoided.
+  - `retire()`: Allows a corporate buyer (e.g., an airline) to permanently "burn" 
+    the token, claiming the environmental benefit for their regulatory compliance.
+  - `CreditRecord`: Every minted batch maps to immutable metadata recorded on-chain, 
+    stating exactly what caused the reduction (e.g., "WasteVision Detection - Plastic Bottle").
+
+B. Integration in the Ecosystem
+- Once WasteVision and PlasmaSim verify that X amount of Methane was diverted 
+  from a landfill and converted into clean energy, the backend calculates the 
+  equivalent Carbon Credits.
+- The user clicks "Mint", which interactively sends a payload to the backend to
+  "mint" those tokens into the simulated ledger (`backend/services/carbon_credit_engine.py`).
+- The market dashboard lists available credits from both our project and seeded 
+  external baseline projects (like Reforestation), allowing simulated industries 
+  to buy and retire them.
+- Defense: This provides a mathematically backed, transparent tracking mechanism 
+  connecting physical waste destruction directly to financial liquidity instruments.
+
+==============================================================================
+5. FULL REPOSITORY FILE MAP
+==============================================================================
+d:\Projects\ATMOSCHAIN
+├── .env                        # Environment variables (GEMINI API Key, Web3 RPC)
+├── requirements.txt            # Python dependencies (fastapi, numpy, web3, etc.)
+├── PROJECT_REPORT.txt          # This heavily detailed architectural document
+
+├── backend/                    # FASTAPI PYTHON SERVER
+│   ├── api/
+│   │   ├── app.py                  # Main uvicorn entry, WebSockets, CORS
+│   │   ├── wastevision_routes.py   # Detection & heatmap endpoints
+│   │   ├── plasmasim_routes.py     # Simulation triggering endpoints
+│   │   └── carbonchain_routes.py   # Minting, market ledger endpoints
+│   └── services/
+│       ├── carbon_credit_engine.py # Mock blockchain ledger / token manager
+│       ├── methane_engine.py       # Wrapper for ML Methane Predictor
+│       └── energy_estimator.py     # Wrapper for ML Energy Predictor
+
+├── ml_models/                  # CORE MACHINE LEARNING & MATHEMATICS
+│   ├── methane_model/
+│   │   └── methane_prediction.py   # IPCC FOD algorithm implementation
+│   ├── plasmasim_models/
+│   │   ├── energy_prediction.py    # Energy output (kWh) estimator logic
+│   │   └── gas_yield_predictor.py  # Chemical database/composition lookup
+│   └── wastevision/
+│       ├── dataset_loader.py       # (Stub) Logic for expanding custom datasets
+│       └── waste_detector.py       # Core Gemini Vision processor & prompt eng
+
+├── simulation/                 # THERMODYNAMIC PHYSICS ENGINE
+│   ├── cyclone_separator_model.py  # Stage 1: Particle removing logic
+│   ├── fractionation_tower_model.py# Stage 3: Cold gas separation logic
+│   ├── gas_scrubber_model.py       # Stage 2: Acid/Chemical scrubbing logic
+│   ├── gas_separation_pipeline.py  # Orchestrator binding stages 1-3
+│   └── plasma_reactor_sim.py       # Stage 0: 5500C Thermal cracking logic
+
+├── blockchain/                 # WEB3 & SMART CONTRACTS
+│   ├── deployment/
+│   │   └── deploy_contract.py      # python-solc-x / web3.py deploy scaffolding
+│   └── smart_contracts/
+│       └── carbon_credit_token.sol # Hardcoded Solidity ERC-20 contract for CCT
+
+├── analytics/                  # DATA ANALYSIS & BI
+│   ├── environmental_impact_model.py # Ghazipur heatmap & localized impact analysis
+│   └── revenue_projection.py       # Financial modeling for plasma plant ROI
+
+└── frontend/                   # NEXT.JS TYPESCRIPT UI
+    ├── package.json
+    ├── tailwind.config.ts / postcss.config.mjs
+    ├── src/
+    │   ├── app/
+    │   │   ├── globals.css         # Glassmorphism, neon colors, animations
+    │   │   ├── layout.tsx          # Root container
+    │   │   ├── page.tsx            # Animated 3D Landing Page
+    │   │   ├── wastevision/page.tsx# Mod 1 Dashboard (Displays AI Results)
+    │   │   ├── plasmasim/page.tsx  # Mod 2 Dashboard (Displays Reactor Simulation)
+    │   │   └── ccts/page.tsx       # Mod 3 Dashboard (Marketplace & Minting)
+    │   └── components/
+    │       ├── wastevision/
+    │       │   └── WebcamDetector.tsx # Component to capture frame & call detection API
+    │       ├── plasmasim/
+    │       └── ccts/
+
+==============================================================================
+6. HOW TO RUN THE SYSTEM
+==============================================================================
+1. Ensure `GEMINI_API_KEY` is loaded into the `/.env` file.
+2. Open Terminal 1:
+   -> `cd d:\Projects\ATMOSCHAIN`
+   -> `python -m uvicorn backend.api.app:app --reload --port 8000`
+3. Open Terminal 2:
+   -> `cd d:\Projects\ATMOSCHAIN\frontend`
+   -> `npm run dev` (Runs on port 3000)
+4. Visit `http://localhost:3000` and enjoy the interconnected experience.
